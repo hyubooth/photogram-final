@@ -1,0 +1,124 @@
+<div>
+  <div>
+    <h1>
+      List of photos
+    </h1>
+  </div>
+</div>
+
+<%# --- Add this section --- %>
+<%# Check if a user is signed in. Adjust 'user_signed_in?' based on your authentication system %>
+<%# --- Replace your current form with this --- %>
+<% if user_signed_in? %>
+  <hr>
+  <div>
+    <h2>Add a new photo</h2>
+    <%# Use form_with - ensure @photo = Photo.new is in your controller %>
+    <%= form_with(model: @photo, local: true) do |form| %>
+
+      <%# Optional: Add this to show errors if saving fails %>
+      <% if form.object.errors.any? %>
+        <div style="color: red;">
+          <h4><%= pluralize(form.object.errors.count, "error") %> prohibited this photo from being saved:</h4>
+          <ul>
+            <% form.object.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div>
+        <%= form.label :image %>
+        <%= form.file_field :image, required: true %>
+      </div>
+
+      <div>
+        <%= form.label :caption %>
+        <%= form.text_field :caption %>
+      </div>
+
+      <%= form.button "Add photo" %>
+    <% end %>
+  </div>
+  <hr>
+<% end %>
+<%# --- End of added section --- %>
+
+<hr>
+
+<div>
+  <div>
+    <table border="1">
+      <thead>
+        <tr>
+          <th>
+            Image
+          </th>
+
+          <th>
+            Caption
+          </th>
+
+          <th>
+            Owner
+          </th>
+
+          <th>
+            Posted
+          </th>
+
+          <th>
+            Likes
+          </th>
+
+          <th>
+            <%# Blank header for the "Show details" link %>
+          </th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% @list_of_photos.each do |a_photo| %>
+        <tr>
+          <td>
+            <%# --- THIS IS THE PART TO CHANGE --- %>
+            <%# Check if an image is attached first %>
+            <% if a_photo.image.attached? %>
+              <%# Display the image using Active Storage %>
+              <%= image_tag a_photo.image, class: "img-responsive", width: "100" %>
+            <% else %>
+              <%# Show a placeholder if no image %>
+              <span>No Image</span>
+            <% end %>
+            <%# --- END OF CHANGE --- %>
+          </td>
+
+          <td>
+            <%= a_photo.caption %>
+          </td>
+
+          <td>
+            <%= a_photo.owner.username %>
+          </td>
+
+          <td>
+            <%= time_ago_in_words(a_photo.created_at) %> ago
+          </td>
+
+          <td>
+            <%= a_photo.likes_count %>
+          </td>
+
+          <td>
+            <%# Use the path helper for consistency %>
+            <%= link_to "Show details", photo_path(a_photo) %>
+          </td>
+        </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<hr>

@@ -1,0 +1,137 @@
+<div>
+  <h1>Photo Details</h1>
+
+  <dl>
+    <dt>
+      Image
+    </dt>
+
+    <dd>
+      <%# --- THIS IS THE CORRECT WAY --- %>
+      <%# 1. Check if an image is actually attached %>
+      <%# if @the_photo.image.attached? %>
+        <%# 2. ONLY if it's attached, create the <img> tag with its URL %>
+      <img src="<%= url_for(@the_photo.image) %>" class="img-responsive" width="100">
+      <%# else %>
+        <%# 3. Otherwise, show a placeholder %>
+        
+      <%# end %>
+      <%# --- END OF CORRECT WAY --- %>
+    </dd>
+
+    <dt>
+      Caption
+    </dt>
+    <dd>
+      <%= @the_photo.caption %>
+    </dd>
+
+    <dt>
+      Owner
+    </dt>
+    <dd>
+      <%# Assuming @the_photo.owner association exists %>
+      <%= @the_photo.owner.username %>
+    </dd>
+
+    <dt>
+      Posted
+    </dt>
+    <dd>
+      <%= time_ago_in_words(@the_photo.created_at) %> ago
+    </dd>
+
+    <dt>
+      Likes count
+    </dt>
+    <dd>
+      <%= @the_photo.likes_count %>
+    </dd>
+
+    <dt>
+      Comments count
+    </dt>
+    <dd>
+      <%= @the_photo.comments_count %>
+    </dd>
+
+    <dt>
+      Fans
+    </dt>
+    <dd>
+      <%# Assuming @the_photo.fans association exists, listing usernames %>
+      <%= @the_photo.fans.map(&:username).to_sentence %>
+    </dd>
+
+    <dt>
+      Add a fan
+    </dt>
+
+    <dd>
+    <% if current_user.present? %>
+      <%# Use the new helper method %>
+      <% existing_like = current_user.find_like_for(@the_photo) %>
+
+      <% if existing_like %>
+        <%# --- UNLIKE BUTTON (DELETE /likes/:id) --- %>
+        <%= button_to "Unlike", like_path(existing_like), method: :delete %>
+      <% else %>
+        <%# --- LIKE BUTTON (POST /photos/:photo_id/likes) --- %>
+        <%= button_to "Like", photo_likes_path(@the_photo), method: :post %>
+      <% end %>
+
+    <% else %>
+      <p>Sign in to like this photo.</p>
+    <% end %>
+  </dd>
+  </dl>
+</div>
+
+<hr>
+
+<div>
+  <h2>Comments</h2>
+  <table border="1"> <%# Added border to match general table look %>
+    <thead>
+      <tr>
+        <th>Commenter</th>
+        <th>Comment</th>
+        <th>Posted</th>
+      </tr>
+    </thead>
+    <tbody>
+      <%# Assuming @the_photo.comments association exists, and comments have .author %>
+      <% @the_photo.comments.each do |a_comment| %>
+        <tr>
+          <td>
+            <%= a_comment.author.username %>
+          </td>
+          <td>
+            <%= a_comment.body %>
+          </td>
+          <td>
+            <%= time_ago_in_words(a_comment.created_at) %> ago
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<hr>
+
+<div>
+  <h3>Add a new comment</h3>
+  <%# This form should point to your "create comment" action %>
+  <form action="/insert_comment" method="post">
+    <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+    <input type="hidden" value="<%= @the_photo.id %>" name="query_photo_id">
+    <div>
+      <label for="browser_comment">Comment</label>
+    </div>
+    <div>
+      <textarea id="browser_comment" name="query_body" placeholder="Enter a comment..."></textarea>
+    </div>
+    <button>Add comment</button>
+  </form>
+</div>

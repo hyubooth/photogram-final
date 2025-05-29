@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Photogram Final</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+  </head>
+
+  <body>
+
+    <h1><%= @this_user.username %></h1>
+
+    <dl>
+      <dt>Private</dt>
+      <dd><%= @this_user.private %></dd>
+
+      <dt>Followers</dt>
+      <dd><%= @this_user.followers.count %></dd>
+
+      <% if current_user == @this_user %>
+        <h4>Pending follow requests</h4>
+        <ul>
+          <% @this_user.follow_received.where(status: "pending").each do |request| %>
+
+            <li>
+              <%= request.sender.username %>
+
+              <form action="/modify_follow_request/<%= request.id %>" method="post">
+                <input type="hidden" name="query_status" value="accepted">
+                <button>Accept</button>
+              </form>
+
+              <form action="/modify_follow_request/<%= request.id %>" method="post">
+                <input type="hidden" name="query_status" value="rejected">
+                <button>Reject</button>
+              </form>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+
+      <dt>Following</dt>
+      <dd><%= @this_user.following.count %></dd>
+    </dl>
+
+    <nav>
+      <ul>
+        <li><a href="/users/<%= @this_user.username %>">Profile</a></li>
+        <li><a href="/users/<%= @this_user.username %>/liked_photos">Liked photos</a></li>
+        <li><a href="/users/<%= @this_user.username %>/feed">Feed</a></li>
+        <li><a href="/users/<%= @this_user.username %>/discover">Discover</a></li>
+      </ul>
+    </nav>
+
+    <h2>Own photos (<%= @this_user.photos.count %>)</h2>
+
+    <table border="1">
+      <tr>
+        <th>Image</th>
+        <th>Owner</th>
+        <th>Caption</th>
+        <th>Posted</th>
+        <th>Likes</th>
+        <th></th>
+      </tr>
+      <% @this_user.photos.each do |photo| %>
+        <tr>
+          <td><img src="<%= photo.image %>" class="img-responsive"></td>
+          <td><%= photo.owner.username %></td>
+          <td><%= photo.caption %></td>
+          <td><%= time_ago_in_words(photo.created_at) %> ago</td>
+          <td><%= photo.likes.count %></td>
+          <td><a href="/photos/<%= photo.id %>">Show details</a></td>
+        </tr>
+      <% end %>
+    </table>
+
+  </body>
+</html>

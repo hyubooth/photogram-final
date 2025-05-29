@@ -29,3 +29,6 @@ en:
     # prompts:
     #   defaults:
     #     age: 'Select your age'
+
+  hints:
+    real_image_uploads: "Select an image file (JPG, PNG, GIF)." # <-- Add your hint text here
