@@ -18,18 +18,18 @@ class FollowRequestsController < ApplicationController
   end
 
   def create
-    the_follow_request = FollowRequest.new
-    the_follow_request.sender_id = params.fetch("query_sender_id")
-    the_follow_request.recipient_id = params.fetch("query_recipient_id")
-    the_follow_request.status = params.fetch("query_status")
+    new_request = FollowRequest.new
+    new_request.recipient_id = params.fetch("recipient_id")
+    new_request.sender_id = current_user.id
+    new_request.status = "pending"
 
-    if the_follow_request.valid?
-      the_follow_request.save
-      redirect_to("/follow_requests", { :notice => "Follow request created successfully." })
+    if new_request.save
+      redirect_to("/users/#{new_request.recipient.username}", notice: "Follow request sent.")
     else
-      redirect_to("/follow_requests", { :alert => the_follow_request.errors.full_messages.to_sentence })
+      redirect_to("/users", alert: "Failed to follow user.")
     end
   end
+
 
   def update
     the_id = params.fetch("path_id")

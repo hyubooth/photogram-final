@@ -8,7 +8,41 @@
   <body>
 
     <h1><%= @this_user.username %></h1>
+    <% if current_user && current_user != @this_user %>
+      <% existing_request = current_user.follow_request_to(@this_user) %>
 
+      <% if existing_request %>
+        <%# A request exists (either pending or accepted) %>
+        <% if existing_request.status == "pending" %>
+          <p>Follow request sent.</p>
+          <%# Optional: Form to cancel the pending request %>
+          <%# This uses your existing manual route for deleting a follow request %>
+          <%# Your route is GET /delete_follow_request/:path_id %>
+          <form action="/delete_follow_request/<%= existing_request.id %>" method="get">
+            <button type="submit">Cancel Request</button>
+          </form>
+        <% elsif existing_request.status == "accepted" %>
+          <%# Current user is already following @this_user %>
+          <%# This uses your existing manual route for deleting a follow request %>
+          <%= link_to "Unfollow", 
+            "/delete_follow_request/#{existing_request.id}", 
+            method: :get, 
+            data: { turbo_confirm: "Are you sure you want to unfollow?" } %>
+
+        <% end %>
+      <% else %>
+        <%# No request exists, so current_user is not following and hasn't sent a request %>
+        <%# This is where the "Follow" button should appear for your test %>
+        <%# This uses your existing manual route for creating a follow request %>
+        <form action="/insert_follow_request" method="post">
+          <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+          <%# The recipient_id is the ID of the user whose profile is being viewed %>
+          <input type="hidden" name="recipient_id" value="<%= @this_user.id %>">
+          <%# sender_id will be current_user.id, handled in the controller %>
+          <button type="submit">Follow</button>
+        </form>
+      <% end %>
+    <% end %>
     <dl>
       <dt>Private</dt>
       <dd><%= @this_user.private %></dd>

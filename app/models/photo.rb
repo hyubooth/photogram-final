@@ -21,6 +21,16 @@ class Photo < ApplicationRecord
   has_one_attached :image
   # --- END OF ADDED LINE ---
 
+  def image_identifier
+    if self.image.attached?
+      self.image.filename.to_s
+    else
+      nil # Or an empty string, depending on what the old test might have relied on for missing images
+    end
+
+    
+  end
+
   validates :owner, presence: true
   # You might want to add a validation for the image later
   # validates :image, presence: true # <--- Add this later if needed

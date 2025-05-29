@@ -14,7 +14,7 @@ class LikesController < ApplicationController
     @like = @photo.likes.build(fan: current_user)
 
     if @like.save
-      redirect_to @photo, notice: "Photo liked!"
+      redirect_to @photo, notice: "Like created successfully"
     else
       redirect_to @photo, alert: "Could not like photo."
     end
@@ -25,7 +25,7 @@ class LikesController < ApplicationController
     if @like && @like.fan == current_user
       photo = @like.photo # Get the photo before destroying the like
       @like.destroy
-      redirect_to photo, notice: "Photo unliked."
+      redirect_to photo, notice: "Like deleted successfully"
     else
       redirect_to root_path, alert: "Could not find your like to unlike."
     end

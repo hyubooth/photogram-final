@@ -1,78 +1,100 @@
+# app/controllers/photos_controller.rb
 class PhotosController < ApplicationController
-  # Make sure user is signed in for actions that need it
-  before_action :authenticate_user!, except: [:index, :show]
-  # Skip for index only if you want anyone to see it
-  # skip_before_action :authenticate_user!, only: [:index]
+  before_action :authenticate_user!, except: [:index]
+  before_action :set_photo, only: [:show, :edit, :update, :destroy] # Add :edit here
+  before_action :authorize_owner, only: [:edit, :update, :destroy] # New action for authorization
+
+# photos_controller.rb
 
   def index
-    @list_of_photos = Photo.all.order({ created_at: :desc })
-    # For the upload form (if it's on the index page)
+    # Only show photos from users who are not private
+    @list_of_photos = Photo.joins(:owner).where(users: { private: false }).order(created_at: :desc)
     @photo = Photo.new
-    render({ template: "photos/index" })
   end
+
 
   def show
-    @the_photo = Photo.find(params[:id]) # Use find for simplicity
-    render({ template: "photos/show" })
-  rescue ActiveRecord::RecordNotFound
-    redirect_to photos_path, alert: "Photo not found."
+    # @the_photo is set by before_action :set_photo
+    # render({ template: "photos/show" }) # Implicitly renders show.html.erb
   end
 
-  def create
-    # Build the photo through the current_user's association
-    @photo = current_user.photos.build(photo_params)
+  # GET /photos/new (if you want a separate new page, otherwise form is on index)
+  # def new
+  #   @photo = current_user.photos.build
+  # end
 
-    Rails.logger.info "--- Attempting to save photo: #{@photo.inspect} ---"
+  def create
+    @photo = current_user.photos.build(photo_create_params)
 
     if @photo.save
-      Rails.logger.info "--- SUCCESS! Photo saved. ---"
       redirect_to photos_path, notice: "Photo created successfully."
     else
-      Rails.logger.error "--- FAILED! Errors: #{@photo.errors.full_messages.to_sentence} ---"
-      # IMPORTANT: If save fails, re-render the form to show errors
-      @list_of_photos = Photo.all.order({ created_at: :desc }) # Reload for index
-      flash.now[:alert] = "Could not add photo: #{@photo.errors.full_messages.to_sentence}"
-      render :index # Re-render the index template (or :new if you have a separate new page)
+      # If create fails, re-render the form with errors
+      @list_of_photos = Photo.all.order({ created_at: :desc }) # For index page form
+      flash.now[:alert] = "Could not add photo: #{@photo.errors.full_messages.join(', ')}"
+      render :index, status: :unprocessable_entity
     end
   end
 
-  def update
-    @the_photo = Photo.find(params[:id]) # Use :id now
+  # GET /photos/:id/edit (This action is needed for an edit page)
+  def edit
+    # @the_photo is set by before_action :set_photo
+    # @the_photo is authorized by before_action :authorize_owner
+    # render({ template: "photos/edit" }) # Implicitly renders edit.html.erb
+    # If your edit form is on the show page, you might not need a separate edit action/view.
+    # However, the form you added to show.html.erb was a manual HTML form.
+    # Using a dedicated edit action and view with form_with is more standard.
+    # For now, let's assume your edit form remains on the show page.
+  end
 
-    # Check if the current user owns the photo before updating
-    if @the_photo.owner == current_user
-      if @the_photo.update(photo_params_for_update) # Use photo_params
-        redirect_to photo_path(@the_photo), notice: "Photo updated successfully."
-      else
-        render :edit, alert: "Update failed: #{@the_photo.errors.full_messages.to_sentence}"
-      end
+  def update
+    # @the_photo is set by before_action :set_photo
+    # @the_photo is authorized by before_action :authorize_owner
+
+    if @the_photo.update(photo_update_params)
+      redirect_to photo_path(@the_photo), notice: "Photo updated successfully."
     else
-      redirect_to photo_path(@the_photo), alert: "You are not authorized to edit this photo."
+      # If you had a separate edit page:
+      # render :edit, status: :unprocessable_entity
+      # If form is on show page, handling errors by re-rendering show is complex.
+      # A redirect with an alert is simpler if not using Turbo.
+      redirect_to photo_path(@the_photo), alert: "Update failed: #{@the_photo.errors.full_messages.to_sentence}"
     end
   end
 
   def destroy
-    @the_photo = Photo.find(params[:id]) # Use :id now
+    # @the_photo is set by before_action :set_photo
+    # @the_photo is authorized by before_action :authorize_owner
 
-    # Check if the current user owns the photo before deleting
-    if @the_photo.owner == current_user
-      @the_photo.destroy
-      redirect_to photos_path, notice: "Photo deleted successfully."
-    else
-      redirect_to photo_path(@the_photo), alert: "You are not authorized to delete this photo."
-    end
+    @the_photo.destroy
+    redirect_to photos_path, notice: "Photo deleted successfully."
   end
 
   private
 
-  def photo_params
-    # It MUST use .require(:photo) because you use form_with(model: @photo)
+  def set_photo
+    @the_photo = Photo.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    redirect_to photos_path, alert: "Photo not found."
+  end
+
+  def authorize_owner
+    unless @the_photo.owner == current_user
+      redirect_to photo_path(@the_photo), alert: "You are not authorized to perform this action."
+    end
+  end
+
+  # Strong parameters for creating a photo
+  def photo_create_params
+    # This assumes your NEW photo form (form_with(model: @photo)) sends params[:photo][:image] etc.
     params.require(:photo).permit(:image, :caption)
   end
 
-  # You might need slightly different params for update
-  def photo_params_for_update
-     params.require(:photo).permit(:image, :caption)
-     # Or params.permit(:image, :caption)
+  # Strong parameters for updating a photo
+  def photo_update_params
+    # This assumes your EDIT photo form (form_with(model: @the_photo)) sends params[:photo][:image] etc.
+    # If the image is optional on update, it will work fine.
+    # If :image is not sent, it won't be updated.
+    params.require(:photo).permit(:caption, :image)
   end
 end

@@ -39,4 +39,19 @@ class User < ApplicationRecord
     likes.find_by(photo_id: photo.id)
   end
 
+
+  # Finds any existing follow request (pending or accepted) sent by this user to another_user
+  def follow_request_to(other_user)
+    follow_sent.find_by(recipient_id: other_user.id)
+  end
+
+  def following?(other_user)
+    follow_sent.exists?(recipient_id: other_user.id, status: 'accepted')
+  end
+
+
+  def pending_follow_request_to?(other_user)
+    request = follow_request_to(other_user)
+    request && request.status == 'pending'
+  end
 end
