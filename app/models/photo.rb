@@ -5,12 +5,12 @@
 #  id             :bigint           not null, primary key
 #  caption        :string
 #  comments_count :integer
+#  image          :string
 #  likes_count    :integer
 #  created_at     :datetime         not null
 #  updated_at     :datetime         not null
 #  owner_id       :integer
 #
-# app/models/photo.rb
 class Photo < ApplicationRecord
   belongs_to :owner, class_name: "User"
   has_many   :comments, dependent: :destroy # Good to add dependent: :destroy
