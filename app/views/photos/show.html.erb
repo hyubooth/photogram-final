@@ -14,11 +14,13 @@
       <%#= image_tag url_for(@the_photo.image), class: "img-responsive", width: 100, height: 100, style: "object-fit: cover;" %>
       <%# First, always check if the image is attached to avoid errors %>
       <% if @the_photo.image.attached? %>
-        <img src="<%= url_for(@the_photo.image) %>" class="img-responsive" width="100" height="100" style="object-fit: cover;">
+        <p>Filename: <%= @the_photo.image.filename.to_s %></p>
+        <%= image_tag @the_photo.image %>
       <% else %>
-        <%# Optional: what to display if no image is attached %>
-        <span>No Image Available</span>
+        <span>No image attached.</span>
       <% end %>
+
+
       <%# --- END OF CORRECT WAY --- %>
     </dd>
 

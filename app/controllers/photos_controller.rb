@@ -8,7 +8,16 @@ class PhotosController < ApplicationController
 
   def index
     # Only show photos from users who are not private
-    @list_of_photos = Photo.joins(:owner).where(users: { private: false }).order(created_at: :desc)
+    @list_of_photos =
+      if user_signed_in?
+        Photo.joins(:owner)
+            .where("users.private = ? OR users.id = ?", false, current_user.id)
+            .order(created_at: :desc)
+      else
+        Photo.joins(:owner).where(users: { private: false }).order(created_at: :desc)
+      end
+
+
     @photo = Photo.new
   end
 
@@ -16,6 +25,8 @@ class PhotosController < ApplicationController
   def show
     # @the_photo is set by before_action :set_photo
     # render({ template: "photos/show" }) # Implicitly renders show.html.erb
+    @the_photo = Photo.find(params[:id])
+
   end
 
   # GET /photos/new (if you want a separate new page, otherwise form is on index)

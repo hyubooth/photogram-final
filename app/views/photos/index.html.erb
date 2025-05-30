@@ -14,7 +14,7 @@
   <div>
     <h2>Add a new photo</h2>
     <%# Use form_with - ensure @photo = Photo.new is in your controller %>
-    <%= form_with(model: @photo, local: true) do |form| %>
+    <%= form_with(model: @photo, local: true, html: { multipart: true }) do |form| %>
 
       <%# Optional: Add this to show errors if saving fails %>
       <% if form.object.errors.any? %>

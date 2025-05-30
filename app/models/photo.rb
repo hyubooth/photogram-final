@@ -13,12 +13,13 @@
 #
 class Photo < ApplicationRecord
   belongs_to :owner, class_name: "User"
+  has_one_attached :image
   has_many   :comments, dependent: :destroy # Good to add dependent: :destroy
   has_many   :likes, dependent: :destroy    # Good to add dependent: :destroy
   has_many   :fans, through: :likes, source: :fan
 
   # --- ADD THIS LINE ---
-  has_one_attached :image
+  
   # --- END OF ADDED LINE ---
 
   def image_identifier
