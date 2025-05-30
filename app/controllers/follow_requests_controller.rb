@@ -18,15 +18,15 @@ class FollowRequestsController < ApplicationController
   end
 
   def create
-    new_request = FollowRequest.new
-    new_request.recipient_id = params.fetch("recipient_id")
-    new_request.sender_id = current_user.id
-    new_request.status = "pending"
+    follow_request = FollowRequest.new
+    follow_request.recipient_id = params[:query_recipient_id]
+    follow_request.sender_id = params[:query_sender_id]
+    follow_request.status = params[:query_status]
 
-    if new_request.save
-      redirect_to("/users/#{new_request.recipient.username}", notice: "Follow request sent.")
+    if follow_request.save
+      redirect_to("/users")
     else
-      redirect_to("/users", alert: "Failed to follow user.")
+      render plain: "Failed to follow: #{follow_request.errors.full_messages.join(", ")}"
     end
   end
 
@@ -53,6 +53,10 @@ class FollowRequestsController < ApplicationController
 
     the_follow_request.destroy
 
-    redirect_to("/follow_requests", { :notice => "Follow request deleted successfully."} )
+    if request.referer.present?
+      redirect_to(request.referer)
+    else
+      redirect_to("/follow_requests", { :notice => "Follow request deleted successfully." })
+    end
   end
 end

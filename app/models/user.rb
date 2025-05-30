@@ -34,6 +34,7 @@ class User < ApplicationRecord
          has_many :follow_received, class_name: "FollowRequest", foreign_key: "recipient_id", dependent: :destroy
          has_many :followers, through: :follow_received, source: :sender
          has_many :following, through: :follow_sent, source: :recipient
+         
   # app/models/user.rb (Add this helper method)
   def find_like_for(photo)
     likes.find_by(photo_id: photo.id)
@@ -54,4 +55,10 @@ class User < ApplicationRecord
     request = follow_request_to(other_user)
     request && request.status == 'pending'
   end
+
+
+  def accepted_following
+    following.merge(FollowRequest.where(status: "accepted"))
+  end
+
 end

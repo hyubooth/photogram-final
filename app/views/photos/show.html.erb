@@ -192,8 +192,9 @@
 <div>
   <h3>Add a new comment</h3>
   <%# This form should point to your "create comment" action %>
-  <form action="/insert_comment" method="post">
+  <form action="/photos/<%= @the_photo.id %>/comments" method="post">
     <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+    <input type="hidden" name="query_author_id" value="<%= current_user.id %>">
     <input type="hidden" value="<%= @the_photo.id %>" name="query_photo_id">
     <div>
       <label for="browser_comment">Comment</label>
@@ -201,6 +202,6 @@
     <div>
       <textarea id="browser_comment" name="query_body" placeholder="Enter a comment..."></textarea>
     </div>
-    <button>Add comment</button>
+    <button type=submit>Add comment</button>
   </form>
 </div>

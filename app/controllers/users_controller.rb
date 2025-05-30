@@ -18,11 +18,16 @@ class UsersController < ApplicationController
   end
   #index
   def index
-    render({:template => "users/index"})
-  end 
+    @users = User.order(:username)
+  end
+
 
   def show
-    @this_user = User.where(username: params[:id]).first
+    @this_user = User
+      .includes(photos: :likes) # preloads likes for each photo
+      .where(username: params[:id])
+      .first
+
 
     if current_user_can_view_details?(@this_user)
       render({ template: "users/show" })

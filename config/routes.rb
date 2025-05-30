@@ -62,4 +62,7 @@ Rails.application.routes.draw do
   post("/modify_follow_request/:path_id", { :controller => "follow_requests", :action => "update" })
   # DELETE
   get("/delete_follow_request/:path_id", { :controller => "follow_requests", :action => "destroy" })
+
+  get "/users/:username/feed", to: "users#feed", as: "user_feed"
+
 end

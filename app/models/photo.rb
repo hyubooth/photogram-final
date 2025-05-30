@@ -3,7 +3,7 @@
 # Table name: photos
 #
 #  id             :bigint           not null, primary key
-#  caption        :string
+#  caption        :text
 #  comments_count :integer
 #  image          :string
 #  likes_count    :integer

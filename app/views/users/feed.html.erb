@@ -1,0 +1,39 @@
+<h1><%= @this_user.username %></h1>
+
+<p>
+  Private<br>
+  <%= @this_user.private? %><br>
+  Followers<br>
+  <%= @this_user.follow_received.where(status: "accepted").count %><br>
+  Following<br>
+  <%= @this_user.follow_sent.where(status: "accepted").count %><br>
+</p>
+
+<ul>
+  <li><a href="/users/<%= @this_user.username %>">Profile</a></li>
+  <li><a href="/users/<%= @this_user.username %>/liked_photos">Liked photos</a></li>
+  <li><a href="/users/<%= @this_user.username %>/feed">Feed</a></li>
+  <li><a href="/users/<%= @this_user.username %>/discover">Discover</a></li>
+</ul>
+
+<h2>Feed (<%= @all_leader_photos.count %>)</h2>
+
+<table border="1">
+  <tr>
+    <th>Image</th>
+    <th>Owner</th>
+    <th>Caption</th>
+    <th>Posted</th>
+    <th>Likes</th>
+  </tr>
+
+  <% @all_leader_photos.each do |photo| %>
+    <tr>
+      <td></td> <!-- Placeholder for image -->
+      <td><%= photo.owner.username %></td>
+      <td><%= photo.caption %></td>
+      <td><%= time_ago_in_words(photo.created_at) %> ago</td>
+      <td><%= photo.likes.count %> <a href="/photos/<%= photo.id %>">Show details</a></td>
+    </tr>
+  <% end %>
+</table>
